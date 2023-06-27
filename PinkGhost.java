@@ -29,8 +29,8 @@ public class PinkGhost extends ghost_model {
     }
 
     @Override
-    protected void Eaten() {
-        if (Math.abs(x - PacmanGame.pacmanX) < (PacmanGame.blockSize / 2) && Math.abs(y - PacmanGame.pacmanY) < (PacmanGame.blockSize / 2)) {//被pacman吃掉
+    protected void Eaten(Pacman pacman) {
+        if (Math.abs(x - pacman.x) < (blockSize / 2) && Math.abs(y - pacman.y) < (blockSize / 2)) {//被pacman吃掉
             PacmanGame.score = PacmanGame.score + 10;
             x = PacmanGame.offsetX + PacmanGame.blockSize * 10;
             y = PacmanGame.offsetY + PacmanGame.blockSize * 10;
@@ -39,24 +39,24 @@ public class PinkGhost extends ghost_model {
     }
 
     @Override
-    public void Hit() {
+    public void Hit(Pacman pacman) {
         if (mode == EnumSet.Mode.frightened) {
-            Eaten();
+            Eaten(pacman);
         } else {
             PacmanGame.hit(x, y);
         }
     }
 
     @Override
-    public EnumSet.Direction GetDirection() {
-        gridX = (x - PacmanGame.offsetX) / PacmanGame.blockSize;        //判斷鬼的位置
-        gridY = (y - PacmanGame.offsetY) / PacmanGame.blockSize;
+    public EnumSet.Direction GetDirection(Pacman pacman) {
+        gridX = (x - offsetX) / blockSize;        //判斷鬼的位置
+        gridY = (y - offsetY) / blockSize;
 
-        switch (PacmanGame.pacmanDirection) {                                    //粉紅鬼的目標->玩家面前2格
-            case up -> targetY = PacmanGame.pacmanGridY - 2;
-            case down -> targetY = PacmanGame.pacmanGridY + 2;
-            case left -> targetX = PacmanGame.pacmanGridX - 2;
-            case right -> targetX = PacmanGame.pacmanGridX + 2;
+        switch (pacman.direction) {                                    //粉紅鬼的目標->玩家面前2格
+            case up -> targetY = pacman.gridY - 2;
+            case down -> targetY = pacman.gridY + 2;
+            case left -> targetX = pacman.gridX - 2;
+            case right -> targetX = pacman.gridX + 2;
         }
 
         if (mode == EnumSet.Mode.normal) {
@@ -161,7 +161,7 @@ public class PinkGhost extends ghost_model {
             }
         } else if (mode == EnumSet.Mode.frightened) {
             if (((y - PacmanGame.offsetY) % PacmanGame.blockSize) == 0 && ((x - PacmanGame.offsetX) % PacmanGame.blockSize) == 0) {
-                direction = frightened(gridX, gridY, direction);
+                direction = frightened(gridX, gridY, direction,pacman);
             }
 
         } else if (mode == EnumSet.Mode.goOut) {
@@ -179,8 +179,8 @@ public class PinkGhost extends ghost_model {
 
 
     @Override
-    public void Move() {
-        direction = GetDirection();
+    public void Move(Pacman pacman) {
+        direction = GetDirection(pacman);
         switch (direction) {
             case up ->        //向上
                     y = y - ghostSpeed;

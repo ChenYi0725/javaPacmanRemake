@@ -67,9 +67,9 @@ public class PacmanGame extends JPanel implements ActionListener {
     static boolean isTrollRemain = true;
 
 
-    static int pacmanX = offsetX + blockSize * 10, pacmanY = offsetY + blockSize * 12;                //pacman位置
-    static int pacmanGridX = 10, pacmanGridY = 12;                //pacman位置(格子)
-    static EnumSet.Direction pacmanDirection = EnumSet.Direction.left;        //pacman面對的方向 上1 下2 左3 右4
+//    static int pacmanX = offsetX + blockSize * 10, pacmanY = offsetY + blockSize * 12;                //pacman位置
+//    static int pacmanGridX = 10, pacmanGridY = 12;                //pacman位置(格子)
+//    static EnumSet.Direction pacmanDirection = EnumSet.Direction.left;        //pacman面對的方向 上1 下2 左3 右4
 
 
     static int[] MapData = {                    //關卡
@@ -130,7 +130,7 @@ public class PacmanGame extends JPanel implements ActionListener {
         drawLastScoreBar();
         setBackground(Color.black);
         addKeyListener(new keyboardAdapter());
-        //addKeyListener(new Pacman.keyboardAdapter());
+        addKeyListener(new Pacman.keyboardAdapter());
         setStartLabel();
         this.add(startLabel);
         this.add(countdownLabel);
@@ -140,7 +140,7 @@ public class PacmanGame extends JPanel implements ActionListener {
 
     //---------------------------鬼
     public static void hit(int ghostX, int ghostY) {    //被鬼碰撞
-        if (Math.abs(ghostX - pacmanX) < (blockSize / 2) && Math.abs(ghostY - pacmanY) < (blockSize / 2)) {
+        if (Math.abs(ghostX - pacman.x) < (blockSize / 2) && Math.abs(ghostY - pacman.y) < (blockSize / 2)) {
             checkIsDead();
         }
     }
@@ -249,7 +249,7 @@ public class PacmanGame extends JPanel implements ActionListener {
 
     public void createPacman() {
         pacmanLabel.setIcon(pacman.upIcon);        //建立pacman
-        pacmanLabel.setLocation(pacmanX, pacmanY);
+        pacmanLabel.setLocation(pacman.x, pacman.y);
         pacmanLabel.setSize(blockSize, blockSize);
         this.add(pacmanLabel);
     }
@@ -278,7 +278,7 @@ public class PacmanGame extends JPanel implements ActionListener {
     public static void resetAllLevel() {                        //把關卡全部重置 (吃完or死透)
         countdownLabel.setText("");
         startLabel.setText("Press Space to Start");
-        pacmanLabel.setIcon(null);
+
         if (clearedLevel > 20) {
             ghostSpeed = 10;
         } else {
@@ -288,18 +288,11 @@ public class PacmanGame extends JPanel implements ActionListener {
         lives = 3;                //lives
         isGameStart = false;
         isPacmanDead = false; //玩家是否死亡
-        isUp = false;        //現在按下哪個按件
-        isDown = false;
-        isLeft = false;
-        isRight = false;
         pelletLeft = 6;        //剩下多少大力丸
         dotLeft = 160;        //剩下多少點點
         isTrollRemain = true;
-        pacmanX = offsetX + blockSize * 10;
-        pacmanY = offsetY + blockSize * 12;                //pacman位置
-        pacmanGridX = 10;
-        pacmanGridY = 12;                //pacman位置(格子)
-        pacmanDirection = EnumSet.Direction.left;        //pacman面對的方向 上1 下2 左3 右4
+
+       pacman.reset();
 
         redGhost.reset();
         pinkGhost.reset();
@@ -313,16 +306,8 @@ public class PacmanGame extends JPanel implements ActionListener {
     public static void loseALife() {//只重設位置
         countdownLabel.setText("");
         startLabel.setText("Press Space to Start");
-        pacmanLabel.setIcon(null);
-        pacmanX = offsetX + blockSize * 10;
-        pacmanY = offsetY + blockSize * 12;                //pacman位置
-        pacmanGridX = 10;
-        pacmanGridY = 12;                //pacman位置(格子)
-        isUp = false;        //現在按下哪個按件
-        isDown = false;
-        isLeft = false;
-        isRight = false;
 
+        pacman.reset();
 
         redGhost.reset();
         pinkGhost.reset();
@@ -356,28 +341,28 @@ public class PacmanGame extends JPanel implements ActionListener {
     }
 
     public void redGhostActive(Graphics graphics) {
-        redGhost.Hit();
-        redGhost.Move();
+        redGhost.Hit(pacman);
+        redGhost.Move(pacman);
         graphics.drawImage(redGhost.GetIcon(), redGhost.x, redGhost.y, this);
 
     }
 
     public void pinkGhostActive(Graphics graphics) {
-        pinkGhost.Hit();
-        pinkGhost.Move();
+        pinkGhost.Hit(pacman);
+        pinkGhost.Move(pacman);
         graphics.drawImage(pinkGhost.GetIcon(), pinkGhost.x, pinkGhost.y, this);
     }
 
     public void blueGhostActive(Graphics graphics) {
-        blueGhost.Hit();
-        blueGhost.Move();
+        blueGhost.Hit(pacman);
+        blueGhost.Move(pacman);
         graphics.drawImage(blueGhost.GetIcon(), blueGhost.x, blueGhost.y, this);
 
     }
 
     public void orangeGhostActive(Graphics graphics) {
-        orangeGhost.Hit();
-        orangeGhost.Move();
+        orangeGhost.Hit(pacman);
+        orangeGhost.Move(pacman);
         graphics.drawImage(orangeGhost.GetIcon(), orangeGhost.x, orangeGhost.y, this);
 
     }
@@ -387,7 +372,7 @@ public class PacmanGame extends JPanel implements ActionListener {
 
         Graphics2D graphics2D = (Graphics2D) graphics;
 
-        pacmanMove();
+        pacman.pacmanMove();
 
         drawMap(graphics2D, MapData);        //畫出地圖
 
@@ -406,7 +391,7 @@ public class PacmanGame extends JPanel implements ActionListener {
 
 
         if (isPelletEaten) {
-            countdownLabel.setLocation(pacmanX + 4, pacmanY + 3);
+            countdownLabel.setLocation(pacman.x + 4, pacman.y + 3);
             countdownLabel.setText(String.valueOf(8 - (currentTime - startTime) / 1000));
             currentTime = System.currentTimeMillis();
             if ((currentTime - startTime) >= 8000) {
@@ -431,12 +416,12 @@ public class PacmanGame extends JPanel implements ActionListener {
     //--------------吃到豆子
     public static void eatDot() {
         //Graphics g=getGraphics();
-        if ((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 16) != 0) {            //如果吃到白點
-            MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] = MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] - 16 + 64;    //清除白點，並紀錄此處原本有白點
+        if ((MapData[pacman.gridX + 20 * (pacman.gridY - 1) - 1] & 16) != 0) {            //如果吃到白點
+            MapData[pacman.gridX + 20 * (pacman.gridY - 1) - 1] = MapData[pacman.gridX + 20 * (pacman.gridY - 1) - 1] - 16 + 64;    //清除白點，並紀錄此處原本有白點
             dotLeft--;
             score = score + 1;
-        } else if ((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 32) != 0) {        //如果吃到橘點
-            MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] = MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] - 32;    //清除大力丸
+        } else if ((MapData[pacman.gridX + 20 * (pacman.gridY - 1) - 1] & 32) != 0) {        //如果吃到橘點
+            MapData[pacman.gridX + 20 * (pacman.gridY - 1) - 1] = MapData[pacman.gridX + 20 * (pacman.gridY - 1) - 1] - 32;    //清除大力丸
             dotLeft--;
             score = score + 5;
             if (isTrollRemain) {
@@ -450,17 +435,17 @@ public class PacmanGame extends JPanel implements ActionListener {
                                     (Math.abs(randomX - blueGhost.gridX) <= 1 && Math.abs(randomY - blueGhost.gridY) <= 1) ||
                                     (Math.abs(randomX - pinkGhost.gridX) <= 1 && Math.abs(randomY - pinkGhost.gridY) <= 1) ||
                                     (Math.abs(randomX - orangeGhost.gridX) <= 1 && Math.abs(randomY - orangeGhost.gridY) <= 1) ||
-                                    (Math.abs(randomX - pacmanGridX) <= 1 && Math.abs(randomY - pacmanGridY) <= 1) ||                //如果傳送到自己旁邊
+                                    (Math.abs(randomX - pacman.gridX) <= 1 && Math.abs(randomY - pacman.gridY) <= 1) ||                //如果傳送到自己旁邊
                                     ((MapData[randomX + 20 * (randomY - 1) - 1] & 32) != 0) ||                                //如果傳送位置有大力丸
                                     ((randomX > 8 && randomX < 13) && ((randomY > 8 && randomY < 11)))                            //如果傳送到鬼的重生點
                             ) {
                                 randomX = ((int) (Math.random() * (quantityOfArenaSide - 2)) + 2);    //建立隨機位置
                                 randomY = ((int) (Math.random() * (quantityOfArenaSide - 2)) + 2);
                             }
-                            pacmanX = offsetX + blockSize * randomX;    //把玩家傳送到隨機位置
-                            pacmanY = offsetY + blockSize * randomY;
-                            pacmanGridX = randomX;
-                            pacmanGridY = randomY;
+                            pacman.x = offsetX + blockSize * randomX;    //把玩家傳送到隨機位置
+                            pacman.y = offsetY + blockSize * randomY;
+                            pacman.gridX = randomX;
+                            pacman.gridY = randomY;
                         }
                         case 2 -> {        //幫鬼加速
                             redGhost.x = redGhost.gridX * blockSize + offsetX;
@@ -511,63 +496,63 @@ public class PacmanGame extends JPanel implements ActionListener {
 //--------------吃到豆子		
 
 
-    public void pacmanMove() {                //移動
-
-        if (isUp && !isDown && !isLeft && !isRight) {                //上
-            pacmanDirection = EnumSet.Direction.up;
-            if (!((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 1) > 0) || (pacmanY - offsetY) % blockSize > 0) {
-
-                if ((pacmanX - offsetX) % blockSize != 0) {
-                    pacmanX = (pacmanGridX) * blockSize + offsetX;
-                }
-
-                pacmanY = pacmanY - pacmanSpeed;
-                if (((pacmanY - offsetY) % blockSize) == (blockSize / 3)) {
-                    pacmanGridY = pacmanGridY - 1;
-                }
-            }
-        } else if (!isUp && isDown && !isLeft && !isRight) {
-            pacmanDirection = EnumSet.Direction.down;
-            if (!((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 2) > 0) || (pacmanY - offsetY) % blockSize > 0) {        //如果當前格子右邊可通行||還沒走到底
-                if ((pacmanX - offsetX) % blockSize != 0) {                                //如果角色面前有牆壁但判定位置面前沒有牆壁->矯正到正確位置
-                    pacmanX = (pacmanGridX) * blockSize + offsetX;
-                }
-
-                pacmanY = pacmanY + pacmanSpeed;
-                if (((pacmanY - offsetY) % blockSize) == (2 * blockSize / 3)) {            //判斷現在格子
-                    pacmanGridY = pacmanGridY + 1;
-                }
-
-            }
-        } else if (!isUp && !isDown && isLeft && !isRight) {
-            pacmanDirection = EnumSet.Direction.left;
-            if (!((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 4) > 0) || (pacmanX - offsetX) % blockSize > 0) {
-                if ((pacmanY - offsetY) % blockSize != 0) {
-                    pacmanY = (pacmanGridY) * blockSize + offsetY;
-                }
-
-                pacmanX = pacmanX - pacmanSpeed;
-                if (((pacmanX - offsetX) % blockSize) == (blockSize / 3)) {
-                    pacmanGridX = pacmanGridX - 1;
-                }
-            }
-        } else if (!isUp && !isDown && !isLeft && isRight) {
-            pacmanDirection = EnumSet.Direction.right;
-            if (!((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 8) > 0) || (pacmanX - offsetX) % blockSize > 0) {
-                if ((pacmanY - offsetY) % blockSize != 0) {
-                    pacmanY = (pacmanGridY) * blockSize + offsetY;
-                }
-
-                pacmanX = pacmanX + pacmanSpeed;
-                if (((pacmanX - offsetX) % blockSize) == (2 * blockSize / 3)) {
-                    pacmanGridX = pacmanGridX + 1;
-                }
-            }
-        }
-
-        eatDot();
-        pacmanLabel.setLocation(pacmanX, pacmanY);
-    }
+//    public void pacmanMove() {                //移動
+//
+//        if (isUp && !isDown && !isLeft && !isRight) {                //上
+//            pacmanDirection = EnumSet.Direction.up;
+//            if (!((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 1) > 0) || (pacmanY - offsetY) % blockSize > 0) {
+//
+//                if ((pacmanX - offsetX) % blockSize != 0) {
+//                    pacmanX = (pacmanGridX) * blockSize + offsetX;
+//                }
+//
+//                pacmanY = pacmanY - pacmanSpeed;
+//                if (((pacmanY - offsetY) % blockSize) == (blockSize / 3)) {
+//                    pacmanGridY = pacmanGridY - 1;
+//                }
+//            }
+//        } else if (!isUp && isDown && !isLeft && !isRight) {
+//            pacmanDirection = EnumSet.Direction.down;
+//            if (!((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 2) > 0) || (pacmanY - offsetY) % blockSize > 0) {        //如果當前格子右邊可通行||還沒走到底
+//                if ((pacmanX - offsetX) % blockSize != 0) {                                //如果角色面前有牆壁但判定位置面前沒有牆壁->矯正到正確位置
+//                    pacmanX = (pacmanGridX) * blockSize + offsetX;
+//                }
+//
+//                pacmanY = pacmanY + pacmanSpeed;
+//                if (((pacmanY - offsetY) % blockSize) == (2 * blockSize / 3)) {            //判斷現在格子
+//                    pacmanGridY = pacmanGridY + 1;
+//                }
+//
+//            }
+//        } else if (!isUp && !isDown && isLeft && !isRight) {
+//            pacmanDirection = EnumSet.Direction.left;
+//            if (!((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 4) > 0) || (pacmanX - offsetX) % blockSize > 0) {
+//                if ((pacmanY - offsetY) % blockSize != 0) {
+//                    pacmanY = (pacmanGridY) * blockSize + offsetY;
+//                }
+//
+//                pacmanX = pacmanX - pacmanSpeed;
+//                if (((pacmanX - offsetX) % blockSize) == (blockSize / 3)) {
+//                    pacmanGridX = pacmanGridX - 1;
+//                }
+//            }
+//        } else if (!isUp && !isDown && !isLeft && isRight) {
+//            pacmanDirection = EnumSet.Direction.right;
+//            if (!((MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 8) > 0) || (pacmanX - offsetX) % blockSize > 0) {
+//                if ((pacmanY - offsetY) % blockSize != 0) {
+//                    pacmanY = (pacmanGridY) * blockSize + offsetY;
+//                }
+//
+//                pacmanX = pacmanX + pacmanSpeed;
+//                if (((pacmanX - offsetX) % blockSize) == (2 * blockSize / 3)) {
+//                    pacmanGridX = pacmanGridX + 1;
+//                }
+//            }
+//        }
+//
+//        eatDot();
+//        pacmanLabel.setLocation(pacmanX, pacmanY);
+//    }
 
 
 //----------------鍵盤監聽

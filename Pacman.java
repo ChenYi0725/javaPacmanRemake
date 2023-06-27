@@ -1,7 +1,5 @@
 package pacman;
 
-import java.awt.*;
-
 import javax.swing.*;
 
 import java.awt.event.*;
@@ -10,26 +8,34 @@ public class Pacman implements ActionListener{
     static int blockSize=PacmanGame.blockSize;
     static int offsetX=PacmanGame.offsetX;
     static int offsetY=PacmanGame.offsetY;
-    static int pacmanSpeed=PacmanGame.pacmanSpeed;
+    static int speed =PacmanGame.pacmanSpeed;
 
     static ImageIcon upIcon = new ImageIcon("img/pacman_up.png");            //獲取相應路徑下的圖片
     static ImageIcon downIcon = new ImageIcon("img/pacman_down.png");
     static ImageIcon leftIcon = new ImageIcon("img/pacman_left.png");
     static ImageIcon rightIcon = new ImageIcon("img/pacman_right.png");
-    static int lives = 3;                //lives
-    static boolean isPacmanDead = false; //玩家是否死亡
-    static boolean isPelletEaten = false;    //是否吃到大力丸
     static boolean isUp = false;        //現在按下哪個按件
     static boolean isDown = false;
     static boolean isLeft = false;
     static boolean isRight = false;
-    static int pacmanX = offsetX + blockSize * 10, pacmanY = offsetY + blockSize * 12;                //pacman位置
-    static int pacmanGridX = 10, pacmanGridY = 12;                //pacman位置(格子)
-    static EnumSet.Direction pacmanDirection = EnumSet.Direction.left;        //pacman面對的方向 上1 下2 左3 右4
+    static int x = offsetX + blockSize * 10, y = offsetY + blockSize * 12;                //pacman位置
+    static int gridX = 10, gridY = 12;                //pacman位置(格子)
+    static EnumSet.Direction direction = EnumSet.Direction.left;        //pacman面對的方向 上1 下2 左3 右4
 
 
 
-
+    public void reset(){
+        PacmanGame.pacmanLabel.setIcon(null);
+        direction = EnumSet.Direction.left;
+        x = offsetX + blockSize * 10;
+        y = offsetY + blockSize * 12;                //pacman位置
+        gridX = 10;
+        gridY = 12;                //pacman位置(格子)
+        isUp = false;        //現在按下哪個按件
+        isDown = false;
+        isLeft = false;
+        isRight = false;
+    }
     public void setPacmanIcon() {            //設定pacman的圖案
         if (isUp && !isDown && !isLeft && !isRight) {
             PacmanGame.pacmanLabel.setIcon(upIcon);
@@ -48,64 +54,64 @@ public class Pacman implements ActionListener{
     public void pacmanMove() {                //移動
 
         if (isUp && !isDown && !isLeft && !isRight) {                //上
-            pacmanDirection = EnumSet.Direction.up;
-            if (!((PacmanGame.MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 1) > 0) || (pacmanY - offsetY) % blockSize > 0) {
+            direction = EnumSet.Direction.up;
+            if (!((PacmanGame.MapData[gridX + 20 * (gridY - 1) - 1] & 1) > 0) || (y - offsetY) % blockSize > 0) {
 
-                if ((pacmanX - offsetX) % blockSize != 0) {
-                    pacmanX = (pacmanGridX) * blockSize + offsetX;
+                if ((x - offsetX) % blockSize != 0) {
+                    x = (gridX) * blockSize + offsetX;
                 }
 
-                pacmanY = pacmanY - pacmanSpeed;
-                if (((pacmanY - offsetY) % blockSize) == (blockSize / 3)) {
-                    pacmanGridY = pacmanGridY - 1;
+                y = y - speed;
+                if (((y - offsetY) % blockSize) == (blockSize / 3)) {
+                    gridY = gridY - 1;
                 }
             }
         } else if (!isUp && isDown && !isLeft && !isRight) {
-            pacmanDirection = EnumSet.Direction.down;
-            if (!((PacmanGame.MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 2) > 0) || (pacmanY - offsetY) % blockSize > 0) {        //如果當前格子右邊可通行||還沒走到底
-                if ((pacmanX - offsetX) % blockSize != 0) {                                //如果角色面前有牆壁但判定位置面前沒有牆壁->矯正到正確位置
-                    pacmanX = (pacmanGridX) * blockSize + offsetX;
+            direction = EnumSet.Direction.down;
+            if (!((PacmanGame.MapData[gridX + 20 * (gridY - 1) - 1] & 2) > 0) || (y - offsetY) % blockSize > 0) {        //如果當前格子右邊可通行||還沒走到底
+                if ((x - offsetX) % blockSize != 0) {                                //如果角色面前有牆壁但判定位置面前沒有牆壁->矯正到正確位置
+                    x = (gridX) * blockSize + offsetX;
                 }
 
-                pacmanY = pacmanY + pacmanSpeed;
-                if (((pacmanY - offsetY) % blockSize) == (2 * blockSize / 3)) {            //判斷現在格子
-                    pacmanGridY = pacmanGridY + 1;
+                y = y + speed;
+                if (((y - offsetY) % blockSize) == (2 * blockSize / 3)) {            //判斷現在格子
+                    gridY = gridY + 1;
                 }
 
             }
         } else if (!isUp && !isDown && isLeft && !isRight) {
-            pacmanDirection = EnumSet.Direction.left;
-            if (!((PacmanGame.MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 4) > 0) || (pacmanX - offsetX) % blockSize > 0) {
-                if ((pacmanY - offsetY) % blockSize != 0) {
-                    pacmanY = (pacmanGridY) * blockSize + offsetY;
+            direction = EnumSet.Direction.left;
+            if (!((PacmanGame.MapData[gridX + 20 * (gridY - 1) - 1] & 4) > 0) || (x - offsetX) % blockSize > 0) {
+                if ((y - offsetY) % blockSize != 0) {
+                    y = (gridY) * blockSize + offsetY;
                 }
 
-                pacmanX = pacmanX - pacmanSpeed;
-                if (((pacmanX - offsetX) % blockSize) == (blockSize / 3)) {
-                    pacmanGridX = pacmanGridX - 1;
+                x = x - speed;
+                if (((x - offsetX) % blockSize) == (blockSize / 3)) {
+                    gridX = gridX - 1;
                 }
             }
         } else if (!isUp && !isDown && !isLeft && isRight) {
-            pacmanDirection = EnumSet.Direction.right;
-            if (!((PacmanGame.MapData[pacmanGridX + 20 * (pacmanGridY - 1) - 1] & 8) > 0) || (pacmanX - offsetX) % blockSize > 0) {
-                if ((pacmanY - offsetY) % blockSize != 0) {
-                    pacmanY = (pacmanGridY) * blockSize + offsetY;
+            direction = EnumSet.Direction.right;
+            if (!((PacmanGame.MapData[gridX + 20 * (gridY - 1) - 1] & 8) > 0) || (x - offsetX) % blockSize > 0) {
+                if ((y - offsetY) % blockSize != 0) {
+                    y = (gridY) * blockSize + offsetY;
                 }
 
-                pacmanX = pacmanX + pacmanSpeed;
-                if (((pacmanX - offsetX) % blockSize) == (2 * blockSize / 3)) {
-                    pacmanGridX = pacmanGridX + 1;
+                x = x + speed;
+                if (((x - offsetX) % blockSize) == (2 * blockSize / 3)) {
+                    gridX = gridX + 1;
                 }
             }
         }
 
         PacmanGame.eatDot();
-        PacmanGame.pacmanLabel.setLocation(pacmanX, pacmanY);
+        PacmanGame.pacmanLabel.setLocation(x, y);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        PacmanGame.repaint();
+
     }
 
 

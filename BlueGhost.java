@@ -10,8 +10,8 @@ public class BlueGhost extends ghost_model {
 
     BlueGhost() {
         Icon = new ImageIcon("img/blue_ghost.png").getImage();
-        x = PacmanGame.offsetX + PacmanGame.blockSize * 11;
-        y = PacmanGame.offsetY + PacmanGame.blockSize * 10;
+        x = offsetX + blockSize * 11;
+        y = offsetY + blockSize * 10;
         gridX = 11;
         gridY = 10;
         mode = EnumSet.Mode.goOut;
@@ -28,8 +28,8 @@ public class BlueGhost extends ghost_model {
     }
 
     @Override
-    protected void Eaten() {
-        if (Math.abs(x - PacmanGame.pacmanX) < (blockSize / 2) && Math.abs(y - PacmanGame.pacmanY) < (PacmanGame.blockSize / 2)) {//被pacman吃掉
+    protected void Eaten(Pacman pacman) {
+        if (Math.abs(x - pacman.x) < (blockSize / 2) && Math.abs(y - pacman.y) < (blockSize / 2)) {//被pacman吃掉
             PacmanGame.score = PacmanGame.score + 10;
             x = offsetX + blockSize * 11;
             y = offsetY + blockSize * 10;
@@ -38,20 +38,20 @@ public class BlueGhost extends ghost_model {
     }
 
     @Override
-    public void Hit() {
+    public void Hit(Pacman pacman) {
         if (mode == EnumSet.Mode.frightened) {
-            Eaten();
+            Eaten(pacman);
         } else {
             PacmanGame.hit(x, y);
         }
     }
 
     @Override
-    public EnumSet.Direction GetDirection() {
-        gridX = (x - PacmanGame.offsetX) / PacmanGame.blockSize;        //判斷鬼的位置
-        gridY = (y - PacmanGame.offsetY) / PacmanGame.blockSize;
+    public EnumSet.Direction GetDirection(Pacman pacman) {
+        gridX = (x - offsetX) / blockSize;        //判斷鬼的位置
+        gridY = (y - offsetY) / blockSize;
         if (mode == EnumSet.Mode.normal) {
-            if (((y - PacmanGame.offsetY) % PacmanGame.blockSize) == 0 && ((x - PacmanGame.offsetX) % PacmanGame.blockSize) == 0) {        //確保鬼會走完一個格子才轉身
+            if (((y - offsetY) % blockSize) == 0 && ((x - offsetX) % blockSize) == 0) {        //確保鬼會走完一個格子才轉身
                 switch (PacmanGame.MapData[gridX + 20 * (gridY - 1) - 1] & 15) {        //判斷鬼該面朝哪
                     case 1:                    //上有牆壁
                         if (direction == EnumSet.Direction.up) {                //鬼從下上來
@@ -153,13 +153,13 @@ public class BlueGhost extends ghost_model {
                 }
             }
         } else if (mode == EnumSet.Mode.frightened) {
-            if (((y - PacmanGame.offsetY) % PacmanGame.blockSize) == 0 && ((x - PacmanGame.offsetX) % PacmanGame.blockSize) == 0) {
-                direction = frightened(gridX, gridY, direction);
+            if (((y - offsetY) % blockSize) == 0 && ((x - offsetX) % blockSize) == 0) {
+                direction = frightened(gridX, gridY, direction, pacman);
             }
 
         } else if (mode == EnumSet.Mode.goOut) {
             direction = EnumSet.Direction.up;
-            if (((y - PacmanGame.offsetY) % PacmanGame.blockSize) == 0 && ((x - PacmanGame.offsetX) % PacmanGame.blockSize) == 0) {
+            if (((y - offsetY) % blockSize) == 0 && ((x - offsetX) % blockSize) == 0) {
                 if (gridY == 7) {
                     mode = EnumSet.Mode.normal;
                     direction = EnumSet.Direction.right;
@@ -171,8 +171,8 @@ public class BlueGhost extends ghost_model {
     }
 
     @Override
-    public void Move() {
-        direction = GetDirection();
+    public void Move(Pacman pacman) {
+        direction = GetDirection(pacman);
         switch (direction) {
             case up ->        //向上
                     y = y - ghostSpeed;

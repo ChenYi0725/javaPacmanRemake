@@ -40,8 +40,8 @@ public class OrangeGhost extends ghost_model {
     }
 
     @Override
-    protected void Eaten() {
-        if (Math.abs(x - PacmanGame.pacmanX) < (blockSize / 2) && Math.abs(y - PacmanGame.pacmanY) < (blockSize / 2)) {//被pacman吃掉
+    protected void Eaten(Pacman pacman) {
+        if (Math.abs(x - pacman.x) < (blockSize / 2) && Math.abs(y - pacman.y) < (blockSize / 2)) {//被pacman吃掉
             PacmanGame.score = PacmanGame.score + 10;
             x = offsetX + blockSize * 9;
             y = offsetY + blockSize * 10;
@@ -51,16 +51,16 @@ public class OrangeGhost extends ghost_model {
     }
 
     @Override
-    public void Hit() {
+    public void Hit(Pacman pacman) {
         if (mode == EnumSet.Mode.frightened) {
-            Eaten();
+            Eaten(pacman);
         } else {
             PacmanGame.hit(x, y);
         }
     }
 
     @Override
-    public EnumSet.Direction GetDirection() {
+    public EnumSet.Direction GetDirection(Pacman pacman) {
         gridX = (x - offsetX) / blockSize;        //判斷鬼的位置
         gridY = (y - offsetY) / blockSize;
         if (mode == EnumSet.Mode.normal) {                    //亂走模式
@@ -160,13 +160,13 @@ public class OrangeGhost extends ghost_model {
         } else if (mode == EnumSet.Mode.evolved) {
             if (((y - offsetY) % blockSize) == 0 && ((x - offsetX) % blockSize) == 0) {        //確保鬼會走完一個格子才轉身
                 if ((int) (Math.random() * 2) == 0) {                //讓鬼的移動較好看
-                    if (gridX - PacmanGame.pacmanGridX > 0) {
+                    if (gridX - pacman.gridX > 0) {
                         direction = EnumSet.Direction.left;
                     } else {
                         direction = EnumSet.Direction.right;
                     }
                 } else {
-                    if (gridY - PacmanGame.pacmanGridY > 0) {
+                    if (gridY - pacman.gridY > 0) {
                         direction = EnumSet.Direction.up;
                     } else {
                         direction = EnumSet.Direction.down;
@@ -176,7 +176,7 @@ public class OrangeGhost extends ghost_model {
             }
         } else if (mode == EnumSet.Mode.frightened) {
             if (((y - offsetY) % blockSize) == 0 && ((x - offsetX) % blockSize) == 0) {
-                direction = frightened(gridX, gridY, direction);
+                direction = frightened(gridX, gridY, direction,pacman);
             }
 
         } else if (mode == EnumSet.Mode.goOut) {
@@ -192,9 +192,10 @@ public class OrangeGhost extends ghost_model {
         return direction;
     }
 
+
     @Override
-    public void Move() {
-        direction = GetDirection();
+    public void Move(Pacman pacman) {
+        direction = GetDirection(pacman);
         switch (direction) {
             case up ->        //向上
                     y = y - ghostSpeed;

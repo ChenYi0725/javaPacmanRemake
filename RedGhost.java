@@ -27,8 +27,8 @@ public class RedGhost extends ghost_model {
     }
 
     @Override
-    protected void Eaten() {
-        if (Math.abs(x - PacmanGame.pacmanX) < (blockSize / 2) && Math.abs(y - PacmanGame.pacmanY) < (blockSize / 2)) {//被pacman吃掉
+    protected void Eaten(Pacman pacman) {
+        if (Math.abs(x - pacman.x) < (blockSize / 2) && Math.abs(y - pacman.y) < (blockSize / 2)) {//被pacman吃掉
             PacmanGame.score = PacmanGame.score + 10;
             x = offsetX + blockSize * 9;
             y = offsetY + blockSize * 10;
@@ -37,16 +37,16 @@ public class RedGhost extends ghost_model {
     }
 
     @Override
-    public void Hit() {
+    public void Hit(Pacman pacman) {
         if (mode == EnumSet.Mode.frightened) {
-            Eaten();
+            Eaten(pacman);
         } else {
             PacmanGame.hit(x, y);
         }
     }
 
     @Override
-    public EnumSet.Direction GetDirection() {
+    public EnumSet.Direction GetDirection(Pacman pacman) {
         gridX = (x - offsetX) / blockSize;        //判斷鬼的位置
         gridY = (y - offsetY) / blockSize;
         if (mode == EnumSet.Mode.normal) {
@@ -55,13 +55,13 @@ public class RedGhost extends ghost_model {
                 switch (PacmanGame.MapData[gridX + 20 * (gridY - 1) - 1] & 15) {        //判斷鬼該面朝哪
                     case 1:                    //上有牆壁
                         if (direction == EnumSet.Direction.up) {                //鬼從下上來
-                            if ((gridX - PacmanGame.pacmanGridX) >= 0) {        //鬼在人右邊
+                            if ((gridX - pacman.gridX) >= 0) {        //鬼在人右邊
                                 direction = EnumSet.Direction.left;
                             } else {
                                 direction = EnumSet.Direction.right;
                             }
                         } else if (direction == EnumSet.Direction.right || direction == EnumSet.Direction.left) {            //鬼從左或右過來
-                            if ((gridY - PacmanGame.pacmanGridY) < 0) {
+                            if ((gridY - pacman.gridY) < 0) {
                                 direction = EnumSet.Direction.down;
                             }
                         }
@@ -70,26 +70,26 @@ public class RedGhost extends ghost_model {
                         break;
                     case 2:                    //下有牆壁
                         if (direction == EnumSet.Direction.down) {                //鬼從上下來
-                            if ((gridX - PacmanGame.pacmanGridX) >= 0) {        //鬼在人右邊
+                            if ((gridX - pacman.gridX) >= 0) {        //鬼在人右邊
                                 direction = EnumSet.Direction.left;
                             } else {
                                 direction = EnumSet.Direction.right;
                             }
                         } else if (direction == EnumSet.Direction.right || direction == EnumSet.Direction.left) {            //鬼從左或右過來
-                            if ((gridY - PacmanGame.pacmanGridY) > 0) {
+                            if ((gridY - pacman.gridY) > 0) {
                                 direction = EnumSet.Direction.up;
                             }
                         }
                         break;
                     case 4:                    //左有牆壁
                         if (direction == EnumSet.Direction.left) {                //鬼從右過來
-                            if ((gridY - PacmanGame.pacmanGridY) <= 0) {        //鬼在人上面
+                            if ((gridY - pacman.gridY) <= 0) {        //鬼在人上面
                                 direction = EnumSet.Direction.down;
                             } else {
                                 direction = EnumSet.Direction.up;
                             }
                         } else if (direction == EnumSet.Direction.up || direction == EnumSet.Direction.down) {            //鬼從上或下過來
-                            if ((gridX - PacmanGame.pacmanGridX) < 0) {
+                            if ((gridX - pacman.gridX) < 0) {
                                 direction = EnumSet.Direction.right;
                             }
                         }
@@ -110,13 +110,13 @@ public class RedGhost extends ghost_model {
                         break;
                     case 8:                    //右有牆壁
                         if (direction == EnumSet.Direction.right) {                //鬼從左過來
-                            if ((gridY - PacmanGame.pacmanGridY) <= 0) {        //鬼在人上面
+                            if ((gridY - pacman.gridY) <= 0) {        //鬼在人上面
                                 direction = EnumSet.Direction.down;
                             } else {
                                 direction = EnumSet.Direction.up;
                             }
                         } else if (direction == EnumSet.Direction.up || direction == EnumSet.Direction.down) {            //鬼從上或下過來
-                            if ((gridX - PacmanGame.pacmanGridX) > 0) {
+                            if ((gridX - pacman.gridX) > 0) {
                                 direction = EnumSet.Direction.left;
                             }
                         }
@@ -137,15 +137,15 @@ public class RedGhost extends ghost_model {
                         break;
                     case 0:                    //十字路口
                         if (direction == EnumSet.Direction.left || direction == EnumSet.Direction.right) {                //面對左或右
-                            if ((gridY - PacmanGame.pacmanGridY) <= 0) {        //鬼在人上面
+                            if ((gridY - pacman.gridY) <= 0) {        //鬼在人上面
                                 direction = EnumSet.Direction.down;
-                            } else if ((gridY - PacmanGame.pacmanGridY) >= 0) {    //鬼在人下面
+                            } else if ((gridY - pacman.gridY) >= 0) {    //鬼在人下面
                                 direction = EnumSet.Direction.up;
                             }
                         } else {                                    //面對上或下
-                            if ((gridX - PacmanGame.pacmanGridX) <= 0) {        //鬼在人左邊
+                            if ((gridX - pacman.gridX) <= 0) {        //鬼在人左邊
                                 direction = EnumSet.Direction.right;
-                            } else if ((gridX - PacmanGame.pacmanGridX) >= 0) {    //鬼在人右邊
+                            } else if ((gridX - pacman.gridX) >= 0) {    //鬼在人右邊
                                 direction = EnumSet.Direction.left;
                             }
                         }
@@ -155,7 +155,7 @@ public class RedGhost extends ghost_model {
 
         } else if (mode == EnumSet.Mode.frightened) {
             if (((y - offsetY) % blockSize) == 0 && ((x - offsetX) % blockSize) == 0) {
-                direction = frightened(gridX, gridY, direction);
+                direction = frightened(gridX, gridY, direction,pacman);
             }
 
         } else if (mode == EnumSet.Mode.goOut) {
@@ -172,8 +172,8 @@ public class RedGhost extends ghost_model {
     }
 
     @Override
-    public void Move() {
-        direction = GetDirection();
+    public void Move(Pacman pacman) {
+        direction = GetDirection(pacman);
         switch (direction) {
             case up ->        //向上
                     y = y - ghostSpeed;
