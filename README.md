@@ -1,2 +1,2 @@
 # javaPacmanRemake
-use PacmanWindow ot open the game
+use PacmanWindow to open the game
